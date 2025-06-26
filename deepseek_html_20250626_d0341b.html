@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ordem de Serviço - Mecânica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .status-aberta {
+            color: blue;
+            font-weight: bold;
+        }
+        .status-fechada {
+            color: green;
+            font-weight: bold;
+        }
+        .table-responsive {
+            margin-bottom: 20px;
+        }
+        .total-label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .logo-empresa {
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        #itemsTable tbody tr {
+            cursor: pointer;
+        }
+        #itemsTable tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .nav-tabs {
+            margin-bottom: 15px;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho da Empresa -->
+        <div class="header text-center">
+            <img id="companyLogo" src="" class="logo-empresa d-none" alt="Logo da Empresa">
+            <h2 id="companyName">AutoMecânica SpeedMaster Ltda</h2>
+            <p id="companyAddress">Av. das Oficinas, 123 - Centro</p>
+            <p id="companyInfo">São Paulo - SP - CNPJ: 12.345.678/0001-99 - IE: 123.456.789.111 - Tel: (11) 5555-1234</p>
+        </div>
+
+        <!-- Barra de Navegação -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="os-tab" data-bs-toggle="tab" data-bs-target="#os-tab-pane" type="button" role="tab">Nova OS</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="clientes-tab" data-bs-toggle="tab" data-bs-target="#clientes-tab-pane" type="button" role="tab">Clientes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="lista-os-tab" data-bs-toggle="tab" data-bs-target="#lista-os-tab-pane" type="button" role="tab">Lista de OS</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config-tab-pane" type="button" role="tab">Configurações</button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="mainTabsContent">
+            <!-- Aba Nova OS -->
+            <div class="tab-pane fade show active" id="os-tab-pane" role="tabpanel" tabindex="0">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>Ordem de Serviço Nº: <span id="osNumber"></span></span>
+                                <div>
+                                    <span>Data Emissão: <span id="osDate"></span></span>
+                                    <span class="ms-3">Status: <span id="osStatus" class="status-aberta">Aberta</span></span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Dados do Cliente/Veículo -->
+                                <div class="card mb-4">
+                                    <div class="card-header">Dados do Cliente/Veículo</div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="clientName" class="form-label required-field">Nome/Razão Social</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="clientName">
+                                                    <button class="btn btn-outline-secondary" type="button" id="selectClientBtn">
+                                                        <i class="bi bi-search"></i> Selecionar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="clientPhone" class="form-label">Telefone</label>
+                                                <input type="text" class="form-control" id="clientPhone">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="clientEmail" class="form-label">E-mail</label>
+                                                <input type="email" class="form-control" id="clientEmail">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="clientAddress" class="form-label">Endereço</label>
+                                                <input type="text" class="form-control" id="clientAddress">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="clientCity" class="form-label">Cidade/UF</label>
+                                                <input type="text" class="form-control" id="clientCity">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="clientDoc" class="form-label">CPF/CNPJ</label>
+                                                <input type="text" class="form-control" id="clientDoc">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="vehicleModel" class="form-label">Veículo</label>
+                                                <input type="text" class="form-control" id="vehicleModel">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="vehiclePlate" class="form-label">Placa</label>
+                                                <input type="text" class="form-control" id="vehiclePlate">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="vehicleKm" class="form-label">KM</label>
+                                                <input type="text" class="form-control" id="vehicleKm">
+                                            </div>
+                                            <div class="col-md-4 d-flex align-items-end">
+                                                <button class="btn btn-primary" id="saveClientBtn">
+                                                    <i class="bi bi-save"></i> Salvar Cliente
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Serviço Solicitado -->
+                                <div class="card mb-4">
+                                    <div class="card-header">Serviço Solicitado</div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-8">
+                                                <label for="serviceDescription" class="form-label">Descrição do Serviço</label>
+                                                <input type="text" class="form-control" id="serviceDescription">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="serviceQty" class="form-label">Qtd</label>
+                                                <input type="number" class="form-control" id="serviceQty" min="1" value="1">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="serviceValue" class="form-label">Vl. Unitário</label>
+                                                <input type="text" class="form-control" id="serviceValue" value="0,00">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Itens da OS -->
+                                <div class="card mb-4">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span>Itens da Ordem de Serviço</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover" id="itemsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="5%">#</th>
+                                                        <th width="55%">Descrição</th>
+                                                        <th width="10%">Qtd</th>
+                                                        <th width="15%">Vl. Unitário</th>
+                                                        <th width="15%">Vl. Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Itens serão adicionados dinamicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="itemDescription" class="form-label">Descrição</label>
+                                                <input type="text" class="form-control" id="itemDescription">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="itemQty" class="form-label">Qtd</label>
+                                                <input type="number" class="form-control" id="itemQty" min="1" value="1">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="itemValue" class="form-label">Vl. Unitário</label>
+                                                <input type="text" class="form-control" id="itemValue" value="0,00">
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button class="btn btn-primary" id="addItemBtn">
+                                                    <i class="bi bi-plus-circle"></i> Adicionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Totais e Observações -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header">Observações</div>
+                                            <div class="card-body">
+                                                <textarea class="form-control" id="osObservations" rows="3"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header">Totais</div>
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="total-label">Valor Total:</span>
+                                                    <span class="total-label" id="totalValue">R$ 0,00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Botões de Ação -->
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button class="btn btn-danger" id="clearAllBtn">
+                                            <i class="bi bi-trash"></i> Limpar Tudo
+                                        </button>
+                                        <button class="btn btn-secondary ms-2" id="newOsBtn">
+                                            <i class="bi bi-file-earmark"></i> Nova OS
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-success" id="saveOsBtn">
+                                            <i class="bi bi-save"></i> Salvar OS
+                                        </button>
+                                        <button class="btn btn-warning ms-2" id="closeOsBtn">
+                                            <i class="bi bi-lock"></i> Fechar OS
+                                        </button>
+                                        <button class="btn btn-primary ms-2" id="printOsBtn">
+                                            <i class="bi bi-printer"></i> Imprimir OS
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Clientes -->
+            <div class="tab-pane fade" id="clientes-tab-pane" role="tabpanel" tabindex="0">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Gerenciamento de Clientes</span>
+                        <button class="btn btn-primary" id="newClientBtn">
+                            <i class="bi bi-plus-circle"></i> Novo Cliente
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="clientSearch" placeholder="Pesquisar cliente...">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchClientBtn">
+                                        <i class="bi bi-search"></i> Pesquisar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="clientsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">ID</th>
+                                        <th width="30%">Nome/Razão Social</th>
+                                        <th width="15%">Telefone</th>
+                                        <th width="20%">CPF/CNPJ</th>
+                                        <th width="20%">Cidade/UF</th>
+                                        <th width="10%">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Clientes serão carregados dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Lista de OS -->
+            <div class="tab-pane fade" id="lista-os-tab-pane" role="tabpanel" tabindex="0">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Lista de Ordens de Serviço</span>
+                        <button class="btn btn-primary" id="printReportBtn">
+                            <i class="bi bi-printer"></i> Imprimir Relatório
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control datepicker" id="startDate" placeholder="Data Início">
+                                    <span class="input-group-text">até</span>
+                                    <input type="text" class="form-control datepicker" id="endDate" placeholder="Data Fim">
+                                    <button class="btn btn-outline-secondary" type="button" id="filterOsBtn">
+                                        <i class="bi bi-funnel"></i> Filtrar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="osTable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">ID</th>
+                                        <th width="10%">Número OS</th>
+                                        <th width="20%">Cliente</th>
+                                        <th width="15%">Veículo</th>
+                                        <th width="10%">Data</th>
+                                        <th width="15%">Valor</th>
+                                        <th width="10%">Status</th>
+                                        <th width="15%">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- OS serão carregadas dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Configurações -->
+            <div class="tab-pane fade" id="config-tab-pane" role="tabpanel" tabindex="0">
+                <div class="card">
+                    <div class="card-header">
+                        Configurações da Empresa
+                    </div>
+                    <div class="card-body">
+                        <form id="companyConfigForm">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="configCompanyName" class="form-label required-field">Nome da Empresa</label>
+                                    <input type="text" class="form-control" id="configCompanyName" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="configCompanyAddress" class="form-label">Endereço</label>
+                                    <input type="text" class="form-control" id="configCompanyAddress">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="configCompanyCity" class="form-label">Cidade/UF</label>
+                                    <input type="text" class="form-control" id="configCompanyCity">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="configCompanyPhone" class="form-label">Telefone</label>
+                                    <input type="text" class="form-control" id="configCompanyPhone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="configCompanyCnpj" class="form-label">CNPJ</label>
+                                    <input type="text" class="form-control" id="configCompanyCnpj">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="configCompanyIe" class="form-label">Inscrição Estadual</label>
+                                    <input type="text" class="form-control" id="configCompanyIe">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="configCompanyLogo" class="form-label">Logo da Empresa</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="configCompanyLogo" accept="image/*">
+                                        <button class="btn btn-outline-secondary" type="button" id="clearLogoBtn">
+                                            <i class="bi bi-trash"></i> Remover
+                                        </button>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <img id="logoPreview" src="" class="img-thumbnail d-none" style="max-height: 150px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Salvar Configurações
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Seleção de Cliente -->
+    <div class="modal fade" id="selectClientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Selecionar Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="modalClientsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome/Razão Social</th>
+                                    <th>Telefone</th>
+                                    <th>CPF/CNPJ</th>
+                                    <th>Cidade/UF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Clientes serão carregados dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectClientBtn">Selecionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Visualização/Edição de Cliente -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientModalTitle">Novo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clientForm">
+                        <input type="hidden" id="modalClientId">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label for="modalClientName" class="form-label required-field">Nome/Razão Social</label>
+                                <input type="text" class="form-control" id="modalClientName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="modalClientPhone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="modalClientPhone">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="modalClientAddress" class="form-label">Endereço</label>
+                                <input type="text" class="form-control" id="modalClientAddress">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalClientCity" class="form-label">Cidade/UF</label>
+                                <input type="text" class="form-control" id="modalClientCity">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalClientDoc" class="form-label">CPF/CNPJ</label>
+                                <input type="text" class="form-control" id="modalClientDoc">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalClientEmail" class="form-label">E-mail</label>
+                                <input type="email" class="form-control" id="modalClientEmail">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalClientDate" class="form-label">Data Cadastro</label>
+                                <input type="text" class="form-control" id="modalClientDate" disabled>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h5>Veículo</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="modalVehicleModel" class="form-label">Modelo</label>
+                                <input type="text" class="form-control" id="modalVehicleModel">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="modalVehiclePlate" class="form-label">Placa</label>
+                                <input type="text" class="form-control" id="modalVehiclePlate">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="modalVehicleKm" class="form-label">KM</label>
+                                <input type="text" class="form-control" id="modalVehicleKm">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveClientModalBtn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Visualização de OS -->
+    <div class="modal fade" id="viewOsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ordem de Serviço Nº <span id="modalOsNumber"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Data Emissão:</strong> <span id="modalOsDate"></span>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <strong>Status:</strong> <span id="modalOsStatus" class="status-aberta">Aberta</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">Dados do Cliente</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Nome:</strong> <span id="modalOsClientName"></span></p>
+                                    <p><strong>Endereço:</strong> <span id="modalOsClientAddress"></span></p>
+                                    <p><strong>Cidade:</strong> <span id="modalOsClientCity"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>CPF/CNPJ:</strong> <span id="modalOsClientDoc"></span></p>
+                                    <p><strong>Telefone:</strong> <span id="modalOsClientPhone"></span></p>
+                                    <p><strong>E-mail:</strong> <span id="modalOsClientEmail"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">Dados do Veículo</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p><strong>Modelo:</strong> <span id="modalOsVehicleModel"></span></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>Placa:</strong> <span id="modalOsVehiclePlate"></span></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>KM:</strong> <span id="modalOsVehicleKm"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">Itens da Ordem de Serviço</div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Descrição</th>
+                                            <th>Qtd</th>
+                                            <th>Vl. Unitário</th>
+                                            <th>Vl. Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modalOsItems">
+                                        <!-- Itens serão carregados dinamicamente -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="4" class="text-end">TOTAL:</th>
+                                            <th id="modalOsTotal">R$ 0,00</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">Observações</div>
+                        <div class="card-body">
+                            <p id="modalOsObservations">Nenhuma observação cadastrada.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="printOsModalBtn">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <button type="button" class="btn btn-warning" id="editOsModalBtn">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/pt-br.min.js"></script>
+    <script>
+        // Configuração inicial
+        moment.locale('pt-br');
+        
+        // Banco de dados simulado (em produção, substituir por um backend real)
+        let db = {
+            company: {
+                name: "AutoMecânica SpeedMaster Ltda",
+                address: "Av. das Oficinas, 123 - Centro",
+                city: "São Paulo - SP",
+                cnpj: "12.345.678/0001-99",
+                ie: "123.456.789.111",
+                phone: "(11) 5555-1234",
+                logo: ""
+            },
+            clients: [],
+            vehicles: [],
+            orders: [],
+            orderItems: []
+        };
+
+        // Estado da aplicação
+        let state = {
+            currentOrder: null,
+            currentClient: null,
+            currentVehicle: null,
+            selectedClient: null,
+            selectedOrder: null
+        };
+
+        // Inicialização da aplicação
+        $(document).ready(function() {
+            initApp();
+            loadSampleData();
+            updateUI();
+            setupEventListeners();
+            setupMasks();
+        });
+
+        function initApp() {
+            // Carrega dados do localStorage se existirem
+            const savedDb = localStorage.getItem('mecanicaDB');
+            if (savedDb) {
+                db = JSON.parse(savedDb);
+            }
+            
+            // Configura data atual
+            $('#osDate').text(moment().format('DD/MM/YYYY HH:mm'));
+            
+            // Gera número da OS
+            generateOsNumber();
+        }
+
+        function loadSampleData() {
+            // Se não houver dados, carrega alguns exemplos
+            if (db.clients.length === 0) {
+                db.clients = [
+                    {
+                        id: 1,
+                        name: "João da Silva",
+                        address: "Rua das Flores, 123",
+                        city: "São Paulo - SP",
+                        doc: "123.456.789-00",
+                        phone: "(11) 9999-8888",
+                        email: "joao@email.com",
+                        createdAt: moment().subtract(10, 'days').format('YYYY-MM-DD HH:mm:ss')
+                    },
+                    {
+                        id: 2,
+                        name: "Maria Oliveira",
+                        address: "Av. Brasil, 456",
+                        city: "Rio de Janeiro - RJ",
+                        doc: "987.654.321-00",
+                        phone: "(21) 8888-7777",
+                        email: "maria@email.com",
+                        createdAt: moment().subtract(5, 'days').format('YYYY-MM-DD HH:mm:ss')
+                    }
+                ];
+                
+                db.vehicles = [
+                    {
+                        id: 1,
+                        clientId: 1,
+                        model: "Fiat Uno 1.0",
+                        plate: "ABC-1234",
+                        km: "85.000"
+                    },
+                    {
+                        id: 2,
+                        clientId: 2,
+                        model: "Volkswagen Gol 1.6",
+                        plate: "XYZ-5678",
+                        km: "120.500"
+                    }
+                ];
+                
+                db.orders = [
+                    {
+                        id: 1,
+                        number: moment().subtract(2, 'days').format('YYYYMMDDHHmm'),
+                        clientId: 1,
+                        vehicleId: 1,
+                        date: moment().subtract(2, 'days').format('YYYY-MM-DD HH:mm:ss'),
+                        service: "Troca de óleo e filtros",
+                        observations: "Verificar freios na próxima revisão",
+                        total: 350.00,
+                        status: "Fechada",
+                        closedDate: moment().subtract(1, 'days').format('YYYY-MM-DD HH:mm:ss')
+                    },
+                    {
+                        id: 2,
+                        number: moment().format('YYYYMMDDHHmm'),
+                        clientId: 2,
+                        vehicleId: 2,
+                        date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                        service: "Alinhamento e balanceamento",
+                        observations: "",
+                        total: 180.00,
+                        status: "Aberta"
+                    }
+                ];
+                
+                db.orderItems = [
+                    {
+                        id: 1,
+                        orderId: 1,
+                        description: "Troca de óleo do motor",
+                        quantity: 1,
+                        unitValue: 120.00,
+                        totalValue: 120.00
+                    },
+                    {
+                        id: 2,
+                        orderId: 1,
+                        description: "Filtro de óleo",
+                        quantity: 1,
+                        unitValue: 30.00,
+                        totalValue: 30.00
+                    },
+                    {
+                        id: 3,
+                        orderId: 1,
+                        description: "Filtro de ar",
+                        quantity: 1,
+                        unitValue: 50.00,
+                        totalValue: 50.00
+                    },
+                    {
+                        id: 4,
+                        orderId: 1,
+                        description: "Mão de obra",
+                        quantity: 2,
+                        unitValue: 75.00,
+                        totalValue: 150.00
+                    },
+                    {
+                        id: 5,
+                        orderId: 2,
+                        description: "Alinhamento",
+                        quantity: 1,
+                        unitValue: 80.00,
+                        totalValue: 80.00
+                    },
+                    {
+                        id: 6,
+                        orderId: 2,
+                        description: "Balanceamento",
+                        quantity: 1,
+                        unitValue: 100.00,
+                        totalValue: 100.00
+                    }
+                ];
+                
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('mecanicaDB', JSON.stringify(db));
+        }
+
+        function updateUI() {
+            // Atualiza cabeçalho da empresa
+            $('#companyName').text(db.company.name);
+            $('#companyAddress').text(db.company.address);
+            $('#companyInfo').text(`${db.company.city} - CNPJ: ${db.company.cnpj} - IE: ${db.company.ie} - Tel: ${db.company.phone}`);
+            
+            if (db.company.logo) {
+                $('#companyLogo').attr('src', db.company.logo).removeClass('d-none');
+            }
+            
+            // Atualiza lista de clientes
+            updateClientsTable();
+            
+            // Atualiza lista de OS
+            updateOrdersTable();
+            
+            // Atualiza configurações da empresa
+            updateCompanyConfig();
+        }
+
+        function setupEventListeners() {
+            // Botão para selecionar cliente
+            $('#selectClientBtn').click(openClientSelectionModal);
+            
+            // Botão para salvar cliente
+            $('#saveClientBtn').click(saveClientFromForm);
+            
+            // Botão para adicionar item
+            $('#addItemBtn').click(addItemToOrder);
+            
+            // Botão para salvar OS
+            $('#saveOsBtn').click(saveOrder);
+            
+            // Botão para fechar OS
+            $('#closeOsBtn').click(closeOrder);
+            
+            // Botão para imprimir OS
+            $('#printOsBtn').click(printOrder);
+            
+            // Botão para limpar tudo
+            $('#clearAllBtn').click(clearAll);
+            
+            // Botão para nova OS
+            $('#newOsBtn').click(newOrder);
+            
+            // Botão para novo cliente
+            $('#newClientBtn').click(openNewClientModal);
+            
+            // Botão para pesquisar clientes
+            $('#searchClientBtn, #clientSearch').on('keyup', searchClients);
+            
+            // Botão para filtrar OS
+            $('#filterOsBtn').click(filterOrders);
+            
+            // Botão para imprimir relatório
+            $('#printReportBtn').click(printReport);
+            
+            // Botão para salvar configurações da empresa
+            $('#companyConfigForm').submit(saveCompanyConfig);
+            
+            // Botão para selecionar cliente no modal
+            $('#confirmSelectClientBtn').click(selectClientFromModal);
+            
+            // Botão para salvar cliente no modal
+            $('#saveClientModalBtn').click(saveClientFromModal);
+            
+            // Botão para editar cliente
+            $(document).on('click', '.edit-client-btn', editClient);
+            
+            // Botão para excluir cliente
+            $(document).on('click', '.delete-client-btn', deleteClient);
+            
+            // Botão para visualizar OS
+            $(document).on('click', '.view-os-btn', viewOrder);
+            
+            // Botão para editar OS
+            $(document).on('click', '.edit-os-btn', editOrder);
+            
+            // Botão para remover item da OS (delegação de evento)
+            $('#itemsTable').on('click', 'tbody tr', function() {
+                if (confirm('Deseja remover este item da OS?')) {
+                    removeItemFromOrder($(this).index());
+                }
+            });
+            
+            // Upload de logo da empresa
+            $('#configCompanyLogo').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        $('#logoPreview').attr('src', event.target.result).removeClass('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Remover logo da empresa
+            $('#clearLogoBtn').click(function() {
+                $('#logoPreview').attr('src', '').addClass('d-none');
+                $('#configCompanyLogo').val('');
+            });
+            
+            // Imprimir OS do modal
+            $('#printOsModalBtn').click(function() {
+                printOrder(state.selectedOrder);
+                $('#viewOsModal').modal('hide');
+            });
+            
+            // Editar OS do modal
+            $('#editOsModalBtn').click(function() {
+                editOrder(state.selectedOrder);
+                $('#viewOsModal').modal('hide');
+            });
+        }
+
+        function setupMasks() {
+            // Máscaras para campos de formulário
+            $('#clientPhone, #modalClientPhone, #configCompanyPhone').mask('(00) 0000-00009');
+            $('#clientDoc, #modalClientDoc').mask('000.000.000-00', {reverse: true});
+            $('#vehiclePlate, #modalVehiclePlate').mask('AAA-0000', {
+                translation: {
+                    'A': {pattern: /[A-Za-z]/}
+                },
+                placeholder: '___-____'
+            });
+            $('#serviceValue, #itemValue').mask('#.##0,00', {reverse: true});
+            $('#startDate, #endDate').mask('00/00/0000');
+        }
+
+        function generateOsNumber() {
+            const now = moment();
+            const osNumber = now.format('YYYYMMDDHHmm');
+            $('#osNumber').text(osNumber);
+            
+            if (state.currentOrder) {
+                state.currentOrder.number = osNumber;
+            }
+        }
+
+        function openClientSelectionModal() {
+            // Preenche a tabela de clientes no modal
+            const $tbody = $('#modalClientsTable tbody');
+            $tbody.empty();
+            
+            db.clients.forEach(client => {
+                const vehicle = db.vehicles.find(v => v.clientId === client.id);
+                $tbody.append(`
+                    <tr data-client-id="${client.id}">
+                        <td>${client.id}</td>
+                        <td>${client.name}</td>
+                        <td>${client.phone}</td>
+                        <td>${client.doc}</td>
+                        <td>${client.city}</td>
+                    </tr>
+                `);
+            });
+            
+            // Mostra o modal
+            $('#selectClientModal').modal('show');
+        }
+
+        function selectClientFromModal() {
+            const selectedRow = $('#modalClientsTable tbody tr.selected');
+            if (selectedRow.length === 0) {
+                alert('Selecione um cliente na tabela!');
+                return;
+            }
+            
+            const clientId = parseInt(selectedRow.attr('data-client-id'));
+            loadClientData(clientId);
+            
+            // Fecha o modal
+            $('#selectClientModal').modal('hide');
+        }
+
+        function loadClientData(clientId) {
+            const client = db.clients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            const vehicle = db.vehicles.find(v => v.clientId === clientId);
+            
+            // Atualiza estado
+            state.currentClient = client;
+            state.currentVehicle = vehicle || null;
+            
+            // Preenche os campos do formulário
+            $('#clientName').val(client.name);
+            $('#clientPhone').val(client.phone);
+            $('#clientEmail').val(client.email || '');
+            $('#clientAddress').val(client.address || '');
+            $('#clientCity').val(client.city || '');
+            $('#clientDoc').val(client.doc || '');
+            
+            if (vehicle) {
+                $('#vehicleModel').val(vehicle.model || '');
+                $('#vehiclePlate').val(vehicle.plate || '');
+                $('#vehicleKm').val(vehicle.km || '');
+            } else {
+                $('#vehicleModel').val('');
+                $('#vehiclePlate').val('');
+                $('#vehicleKm').val('');
+            }
+            
+            // Se estiver editando uma OS, atualiza os dados do cliente na OS
+            if (state.currentOrder) {
+                state.currentOrder.clientId = clientId;
+                state.currentOrder.vehicleId = vehicle ? vehicle.id : null;
+            }
+        }
+
+        function saveClientFromForm() {
+            const clientData = {
+                name: $('#clientName').val(),
+                phone: $('#clientPhone').val(),
+                email: $('#clientEmail').val(),
+                address: $('#clientAddress').val(),
+                city: $('#clientCity').val(),
+                doc: $('#clientDoc').val()
+            };
+            
+            if (!clientData.name) {
+                alert('O nome do cliente é obrigatório!');
+                return;
+            }
+            
+            const vehicleData = {
+                model: $('#vehicleModel').val(),
+                plate: $('#vehiclePlate').val(),
+                km: $('#vehicleKm').val()
+            };
+            
+            if (state.currentClient) {
+                // Atualiza cliente existente
+                Object.assign(state.currentClient, clientData);
+                
+                // Atualiza ou cria veículo
+                if (state.currentVehicle) {
+                    Object.assign(state.currentVehicle, vehicleData);
+                } else if (vehicleData.model || vehicleData.plate) {
+                    const newVehicle = {
+                        id: db.vehicles.length > 0 ? Math.max(...db.vehicles.map(v => v.id)) + 1 : 1,
+                        clientId: state.currentClient.id,
+                        ...vehicleData
+                    };
+                    db.vehicles.push(newVehicle);
+                    state.currentVehicle = newVehicle;
+                }
+            } else {
+                // Cria novo cliente
+                const newClient = {
+                    id: db.clients.length > 0 ? Math.max(...db.clients.map(c => c.id)) + 1 : 1,
+                    ...clientData,
+                    createdAt: moment().format('YYYY-MM-DD HH:mm:ss')
+                };
+                db.clients.push(newClient);
+                state.currentClient = newClient;
+                
+                // Cria veículo se houver dados
+                if (vehicleData.model || vehicleData.plate) {
+                    const newVehicle = {
+                        id: db.vehicles.length > 0 ? Math.max(...db.vehicles.map(v => v.id)) + 1 : 1,
+                        clientId: newClient.id,
+                        ...vehicleData
+                    };
+                    db.vehicles.push(newVehicle);
+                    state.currentVehicle = newVehicle;
+                }
+            }
+            
+            // Se estiver editando uma OS, atualiza os dados do cliente na OS
+            if (state.currentOrder) {
+                state.currentOrder.clientId = state.currentClient.id;
+                state.currentOrder.vehicleId = state.currentVehicle ? state.currentVehicle.id : null;
+            }
+            
+            saveToLocalStorage();
+            updateClientsTable();
+            alert('Cliente salvo com sucesso!');
+        }
+
+        function addItemToOrder() {
+            const description = $('#itemDescription').val();
+            const quantity = parseFloat($('#itemQty').val().replace(',', '.'));
+            const unitValue = parseFloat($('#itemValue').val().replace('.', '').replace(',', '.'));
+            
+            if (!description || isNaN(quantity) || isNaN(unitValue)) {
+                alert('Preencha todos os campos do item corretamente!');
+                return;
+            }
+            
+            const totalValue = quantity * unitValue;
+            const item = {
+                description,
+                quantity,
+                unitValue,
+                totalValue
+            };
+            
+            // Se não houver uma OS em edição, cria uma nova
+            if (!state.currentOrder) {
+                newOrder();
+            }
+            
+            // Adiciona à lista de itens da OS
+            if (!state.currentOrder.items) {
+                state.currentOrder.items = [];
+            }
+            
+            state.currentOrder.items.push(item);
+            updateOrderItemsTable();
+            
+            // Limpa os campos
+            $('#itemDescription').val('');
+            $('#itemQty').val('1');
+            $('#itemValue').val('0,00');
+            $('#itemDescription').focus();
+        }
+
+        function updateOrderItemsTable() {
+            const $tbody = $('#itemsTable tbody');
+            $tbody.empty();
+            
+            if (state.currentOrder && state.currentOrder.items) {
+                state.currentOrder.items.forEach((item, index) => {
+                    $tbody.append(`
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.description}</td>
+                            <td>${item.quantity.toFixed(2)}</td>
+                            <td>R$ ${item.unitValue.toFixed(2).replace('.', ',')}</td>
+                            <td>R$ ${item.totalValue.toFixed(2).replace('.', ',')}</td>
+                        </tr>
+                    `);
+                });
+                
+                // Calcula o total
+                const total = state.currentOrder.items.reduce((sum, item) => sum + item.totalValue, 0);
+                $('#totalValue').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+                
+                // Atualiza o total na OS
+                if (state.currentOrder) {
+                    state.currentOrder.total = total;
+                }
+            } else {
+                $('#totalValue').text('R$ 0,00');
+            }
+        }
+
+        function removeItemFromOrder(index) {
+            if (state.currentOrder && state.currentOrder.items && state.currentOrder.items.length > index) {
+                state.currentOrder.items.splice(index, 1);
+                updateOrderItemsTable();
+            }
+        }
+
+        function saveOrder() {
+            if (!state.currentClient) {
+                alert('Selecione ou cadastre um cliente antes de salvar a OS!');
+                return;
+            }
+            
+            if (!state.currentOrder || !state.currentOrder.items || state.currentOrder.items.length === 0) {
+                alert('Adicione pelo menos um item à OS antes de salvar!');
+                return;
+            }
+            
+            const serviceDescription = $('#serviceDescription').val();
+            const observations = $('#osObservations').val();
+            
+            if (!state.currentOrder.id) {
+                // Nova OS
+                const newOrder = {
+                    id: db.orders.length > 0 ? Math.max(...db.orders.map(o => o.id)) + 1 : 1,
+                    number: $('#osNumber').text(),
+                    clientId: state.currentClient.id,
+                    vehicleId: state.currentVehicle ? state.currentVehicle.id : null,
+                    date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                    service: serviceDescription,
+                    observations: observations,
+                    items: [...state.currentOrder.items],
+                    total: state.currentOrder.total,
+                    status: 'Aberta'
+                };
+                
+                db.orders.push(newOrder);
+                state.currentOrder = newOrder;
+                
+                // Adiciona itens ao banco de dados
+                state.currentOrder.items.forEach(item => {
+                    const newItem = {
+                        id: db.orderItems.length > 0 ? Math.max(...db.orderItems.map(i => i.id)) + 1 : 1,
+                        orderId: newOrder.id,
+                        ...item
+                    };
+                    db.orderItems.push(newItem);
+                });
+            } else {
+                // Atualiza OS existente
+                const orderIndex = db.orders.findIndex(o => o.id === state.currentOrder.id);
+                if (orderIndex !== -1) {
+                    db.orders[orderIndex] = {
+                        ...db.orders[orderIndex],
+                        clientId: state.currentClient.id,
+                        vehicleId: state.currentVehicle ? state.currentVehicle.id : null,
+                        service: serviceDescription,
+                        observations: observations,
+                        items: [...state.currentOrder.items],
+                        total: state.currentOrder.total
+                    };
+                }
+                
+                // Remove itens antigos e adiciona os novos
+                db.orderItems = db.orderItems.filter(item => item.orderId !== state.currentOrder.id);
+                
+                state.currentOrder.items.forEach(item => {
+                    const newItem = {
+                        id: db.orderItems.length > 0 ? Math.max(...db.orderItems.map(i => i.id)) + 1 : 1,
+                        orderId: state.currentOrder.id,
+                        ...item
+                    };
+                    db.orderItems.push(newItem);
+                });
+            }
+            
+            saveToLocalStorage();
+            updateOrdersTable();
+            alert('Ordem de Serviço salva com sucesso!');
+        }
+
+        function closeOrder() {
+            if (!state.currentOrder || !state.currentOrder.id) {
+                alert('Salve a OS antes de fechá-la!');
+                return;
+            }
+            
+            if (state.currentOrder.status === 'Fechada') {
+                alert('Esta OS já está fechada!');
+                return;
+            }
+            
+            if (confirm('Deseja realmente fechar esta OS?')) {
+                state.currentOrder.status = 'Fechada';
+                state.currentOrder.closedDate = moment().format('YYYY-MM-DD HH:mm:ss');
+                
+                const orderIndex = db.orders.findIndex(o => o.id === state.currentOrder.id);
+                if (orderIndex !== -1) {
+                    db.orders[orderIndex] = state.currentOrder;
+                }
+                
+                saveToLocalStorage();
+                updateOrdersTable();
+                updateOsStatus();
+                alert('OS fechada com sucesso!');
+            }
+        }
+
+        function updateOsStatus() {
+            if (state.currentOrder) {
+                $('#osStatus').text(state.currentOrder.status);
+                
+                if (state.currentOrder.status === 'Fechada') {
+                    $('#osStatus').removeClass('status-aberta').addClass('status-fechada');
+                    $('#closeOsBtn').prop('disabled', true);
+                } else {
+                    $('#osStatus').removeClass('status-fechada').addClass('status-aberta');
+                    $('#closeOsBtn').prop('disabled', false);
+                }
+            }
+        }
+
+        function printOrder(order = null) {
+            // Esta função seria implementada para gerar um PDF ou imprimir diretamente
+            // Em um ambiente real, seria necessário um backend para gerar o PDF
+            alert('Funcionalidade de impressão seria implementada aqui.\nEm um sistema real, isso geraria um PDF da OS.');
+            
+            // Em um sistema real, poderia ser algo como:
+            // window.open(`/print-os/${order ? order.id : state.currentOrder.id}`, '_blank');
+        }
+
+        function clearAll() {
+            if (confirm('Deseja realmente limpar todos os dados da OS atual?\nOs dados não salvos serão perdidos.')) {
+                state.currentOrder = null;
+                state.currentClient = null;
+                state.currentVehicle = null;
+                
+                // Limpa os campos
+                $('#clientName, #clientPhone, #clientEmail, #clientAddress, #clientCity, #clientDoc').val('');
+                $('#vehicleModel, #vehiclePlate, #vehicleKm').val('');
+                $('#serviceDescription, #serviceQty, #serviceValue').val('');
+                $('#osObservations').val('');
+                
+                // Limpa a tabela de itens
+                $('#itemsTable tbody').empty();
+                $('#totalValue').text('R$ 0,00');
+                
+                // Gera novo número de OS
+                generateOsNumber();
+            }
+        }
+
+        function newOrder() {
+            if (state.currentOrder && state.currentOrder.items && state.currentOrder.items.length > 0) {
+                if (!confirm('Deseja criar uma nova OS?\nOs dados não salvos da OS atual serão perdidos.')) {
+                    return;
+                }
+            }
+            
+            clearAll();
+        }
+
+        function updateClientsTable(filter = '') {
+            const $tbody = $('#clientsTable tbody');
+            $tbody.empty();
+            
+            const filteredClients = filter 
+                ? db.clients.filter(client => 
+                    client.name.toLowerCase().includes(filter.toLowerCase()) || 
+                    (client.doc && client.doc.includes(filter)))
+                : db.clients;
+            
+            filteredClients.forEach(client => {
+                const vehicle = db.vehicles.find(v => v.clientId === client.id);
+                $tbody.append(`
+                    <tr>
+                        <td>${client.id}</td>
+                        <td>${client.name}</td>
+                        <td>${client.phone}</td>
+                        <td>${client.doc || '-'}</td>
+                        <td>${client.city || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary edit-client-btn" data-client-id="${client.id}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-client-btn" data-client-id="${client.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function searchClients() {
+            const filter = $('#clientSearch').val();
+            updateClientsTable(filter);
+        }
+
+        function openNewClientModal() {
+            $('#clientModalTitle').text('Novo Cliente');
+            $('#modalClientId').val('');
+            $('#modalClientName, #modalClientPhone, #modalClientAddress, #modalClientCity, #modalClientDoc, #modalClientEmail').val('');
+            $('#modalClientDate').val(moment().format('DD/MM/YYYY'));
+            $('#modalVehicleModel, #modalVehiclePlate, #modalVehicleKm').val('');
+            
+            $('#clientModal').modal('show');
+        }
+
+        function editClient() {
+            const clientId = parseInt($(this).attr('data-client-id'));
+            const client = db.clients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            const vehicle = db.vehicles.find(v => v.clientId === clientId);
+            
+            $('#clientModalTitle').text('Editar Cliente');
+            $('#modalClientId').val(client.id);
+            $('#modalClientName').val(client.name);
+            $('#modalClientPhone').val(client.phone);
+            $('#modalClientAddress').val(client.address || '');
+            $('#modalClientCity').val(client.city || '');
+            $('#modalClientDoc').val(client.doc || '');
+            $('#modalClientEmail').val(client.email || '');
+            $('#modalClientDate').val(moment(client.createdAt).format('DD/MM/YYYY'));
+            
+            if (vehicle) {
+                $('#modalVehicleModel').val(vehicle.model || '');
+                $('#modalVehiclePlate').val(vehicle.plate || '');
+                $('#modalVehicleKm').val(vehicle.km || '');
+            } else {
+                $('#modalVehicleModel').val('');
+                $('#modalVehiclePlate').val('');
+                $('#modalVehicleKm').val('');
+            }
+            
+            $('#clientModal').modal('show');
+        }
+
+        function saveClientFromModal() {
+            const clientId = $('#modalClientId').val();
+            const clientData = {
+                name: $('#modalClientName').val(),
+                phone: $('#modalClientPhone').val(),
+                email: $('#modalClientEmail').val(),
+                address: $('#modalClientAddress').val(),
+                city: $('#modalClientCity').val(),
+                doc: $('#modalClientDoc').val()
+            };
+            
+            if (!clientData.name) {
+                alert('O nome do cliente é obrigatório!');
+                return;
+            }
+            
+            const vehicleData = {
+                model: $('#modalVehicleModel').val(),
+                plate: $('#modalVehiclePlate').val(),
+                km: $('#modalVehicleKm').val()
+            };
+            
+            if (clientId) {
+                // Atualiza cliente existente
+                const client = db.clients.find(c => c.id === parseInt(clientId));
+                if (client) {
+                    Object.assign(client, clientData);
+                    
+                    // Atualiza ou cria veículo
+                    const vehicle = db.vehicles.find(v => v.clientId === parseInt(clientId));
+                    if (vehicle) {
+                        Object.assign(vehicle, vehicleData);
+                    } else if (vehicleData.model || vehicleData.plate) {
+                        const newVehicle = {
+                            id: db.vehicles.length > 0 ? Math.max(...db.vehicles.map(v => v.id)) + 1 : 1,
+                            clientId: parseInt(clientId),
+                            ...vehicleData
+                        };
+                        db.vehicles.push(newVehicle);
+                    }
+                }
+            } else {
+                // Cria novo cliente
+                const newClient = {
+                    id: db.clients.length > 0 ? Math.max(...db.clients.map(c => c.id)) + 1 : 1,
+                    ...clientData,
+                    createdAt: moment().format('YYYY-MM-DD HH:mm:ss')
+                };
+                db.clients.push(newClient);
+                
+                // Cria veículo se houver dados
+                if (vehicleData.model || vehicleData.plate) {
+                    const newVehicle = {
+                        id: db.vehicles.length > 0 ? Math.max(...db.vehicles.map(v => v.id)) + 1 : 1,
+                        clientId: newClient.id,
+                        ...vehicleData
+                    };
+                    db.vehicles.push(newVehicle);
+                }
+            }
+            
+            saveToLocalStorage();
+            updateClientsTable();
+            $('#clientModal').modal('hide');
+            alert('Cliente salvo com sucesso!');
+        }
+
+        function deleteClient() {
+            const clientId = parseInt($(this).attr('data-client-id'));
+            const client = db.clients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            if (!confirm(`Tem certeza que deseja excluir o cliente "${client.name}"?`)) {
+                return;
+            }
+            
+            // Verifica se o cliente tem OS associadas
+            const hasOrders = db.orders.some(o => o.clientId === clientId);
+            if (hasOrders) {
+                alert('Este cliente possui ordens de serviço associadas e não pode ser excluído!');
+                return;
+            }
+            
+            // Remove o veículo do cliente se existir
+            db.vehicles = db.vehicles.filter(v => v.clientId !== clientId);
+            
+            // Remove o cliente
+            db.clients = db.clients.filter(c => c.id !== clientId);
+            
+            saveToLocalStorage();
+            updateClientsTable();
+            alert('Cliente excluído com sucesso!');
+        }
+
+        function updateOrdersTable() {
+            const $tbody = $('#osTable tbody');
+            $tbody.empty();
+            
+            db.orders.forEach(order => {
+                const client = db.clients.find(c => c.id === order.clientId);
+                const vehicle = db.vehicles.find(v => v.id === order.vehicleId);
+                
+                $tbody.append(`
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.number}</td>
+                        <td>${client ? client.name : 'Cliente não encontrado'}</td>
+                        <td>${vehicle ? vehicle.model : 'Veículo não informado'}</td>
+                        <td>${moment(order.date).format('DD/MM/YYYY')}</td>
+                        <td>R$ ${order.total.toFixed(2).replace('.', ',')}</td>
+                        <td>
+                            <span class="${order.status === 'Aberta' ? 'status-aberta' : 'status-fechada'}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary view-os-btn" data-order-id="${order.id}">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning edit-os-btn" data-order-id="${order.id}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function filterOrders() {
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+            
+            try {
+                const start = moment(startDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
+                const end = moment(endDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
+                
+                const $tbody = $('#osTable tbody');
+                $tbody.empty();
+                
+                db.orders.forEach(order => {
+                    const orderDate = moment(order.date).format('YYYY-MM-DD');
+                    if (orderDate >= start && orderDate <= end) {
+                        const client = db.clients.find(c => c.id === order.clientId);
+                        const vehicle = db.vehicles.find(v => v.id === order.vehicleId);
+                        
+                        $tbody.append(`
+                            <tr>
+                                <td>${order.id}</td>
+                                <td>${order.number}</td>
+                                <td>${client ? client.name : 'Cliente não encontrado'}</td>
+                                <td>${vehicle ? vehicle.model : 'Veículo não informado'}</td>
+                                <td>${moment(order.date).format('DD/MM/YYYY')}</td>
+                                <td>R$ ${order.total.toFixed(2).replace('.', ',')}</td>
+                                <td>
+                                    <span class="${order.status === 'Aberta' ? 'status-aberta' : 'status-fechada'}">
+                                        ${order.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary view-os-btn" data-order-id="${order.id}">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning edit-os-btn" data-order-id="${order.id}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    }
+                });
+            } catch (e) {
+                alert('Formato de data inválido! Use DD/MM/AAAA');
+            }
+        }
+
+        function viewOrder() {
+            const orderId = parseInt($(this).attr('data-order-id'));
+            const order = db.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const client = db.clients.find(c => c.id === order.clientId);
+            const vehicle = db.vehicles.find(v => v.id === order.vehicleId);
+            const items = db.orderItems.filter(i => i.orderId === order.id);
+            
+            // Preenche os dados no modal
+            $('#modalOsNumber').text(order.number);
+            $('#modalOsDate').text(moment(order.date).format('DD/MM/YYYY HH:mm'));
+            $('#modalOsStatus').text(order.status).removeClass('status-aberta status-fechada')
+                .addClass(order.status === 'Aberta' ? 'status-aberta' : 'status-fechada');
+            
+            if (client) {
+                $('#modalOsClientName').text(client.name);
+                $('#modalOsClientAddress').text(client.address || 'Não informado');
+                $('#modalOsClientCity').text(client.city || 'Não informado');
+                $('#modalOsClientDoc').text(client.doc || 'Não informado');
+                $('#modalOsClientPhone').text(client.phone || 'Não informado');
+                $('#modalOsClientEmail').text(client.email || 'Não informado');
+            }
+            
+            if (vehicle) {
+                $('#modalOsVehicleModel').text(vehicle.model || 'Não informado');
+                $('#modalOsVehiclePlate').text(vehicle.plate || 'Não informado');
+                $('#modalOsVehicleKm').text(vehicle.km || 'Não informado');
+            }
+            
+            // Preenche os itens
+            const $itemsBody = $('#modalOsItems');
+            $itemsBody.empty();
+            
+            let total = 0;
+            items.forEach((item, index) => {
+                $itemsBody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.description}</td>
+                        <td>${item.quantity.toFixed(2)}</td>
+                        <td>R$ ${item.unitValue.toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${item.totalValue.toFixed(2).replace('.', ',')}</td>
+                    </tr>
+                `);
+                total += item.totalValue;
+            });
+            
+            $('#modalOsTotal').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+            $('#modalOsObservations').text(order.observations || 'Nenhuma observação cadastrada.');
+            
+            // Atualiza o estado
+            state.selectedOrder = order;
+            
+            // Mostra o modal
+            $('#viewOsModal').modal('show');
+        }
+
+        function editOrder(orderId = null) {
+            if (!orderId) {
+                orderId = parseInt($(this).attr('data-order-id'));
+            }
+            
+            const order = db.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const client = db.clients.find(c => c.id === order.clientId);
+            const vehicle = db.vehicles.find(v => v.id === order.vehicleId);
+            const items = db.orderItems.filter(i => i.orderId === order.id);
+            
+            // Limpa os campos
+            clearAll();
+            
+            // Preenche os dados da OS
+            state.currentOrder = order;
+            state.currentOrder.items = items.map(item => ({
+                description: item.description,
+                quantity: item.quantity,
+                unitValue: item.unitValue,
+                totalValue: item.totalValue
+            }));
+            
+            $('#osNumber').text(order.number);
+            $('#osDate').text(moment(order.date).format('DD/MM/YYYY HH:mm'));
+            $('#serviceDescription').val(order.service);
+            $('#osObservations').val(order.observations || '');
+            
+            // Atualiza status
+            updateOsStatus();
+            
+            // Preenche os dados do cliente
+            if (client) {
+                state.currentClient = client;
+                state.currentVehicle = vehicle || null;
+                
+                $('#clientName').val(client.name);
+                $('#clientPhone').val(client.phone);
+                $('#clientEmail').val(client.email || '');
+                $('#clientAddress').val(client.address || '');
+                $('#clientCity').val(client.city || '');
+                $('#clientDoc').val(client.doc || '');
+                
+                if (vehicle) {
+                    $('#vehicleModel').val(vehicle.model || '');
+                    $('#vehiclePlate').val(vehicle.plate || '');
+                    $('#vehicleKm').val(vehicle.km || '');
+                }
+            }
+            
+            // Atualiza a tabela de itens
+            updateOrderItemsTable();
+            
+            // Muda para a aba de OS
+            $('#mainTabs button[data-bs-target="#os-tab-pane"]').tab('show');
+        }
+
+        function printReport() {
+            // Esta função seria implementada para gerar um PDF com o relatório
+            // Em um ambiente real, seria necessário um backend para gerar o PDF
+            alert('Funcionalidade de relatório seria implementada aqui.\nEm um sistema real, isso geraria um PDF com as OS filtradas.');
+            
+            // Em um sistema real, poderia ser algo como:
+            // const startDate = $('#startDate').val();
+            // const endDate = $('#endDate').val();
+            // window.open(`/print-report?start=${startDate}&end=${endDate}`, '_blank');
+        }
+
+        function updateCompanyConfig() {
+            $('#configCompanyName').val(db.company.name);
+            $('#configCompanyAddress').val(db.company.address);
+            $('#configCompanyCity').val(db.company.city);
+            $('#configCompanyPhone').val(db.company.phone);
+            $('#configCompanyCnpj').val(db.company.cnpj);
+            $('#configCompanyIe').val(db.company.ie);
+            
+            if (db.company.logo) {
+                $('#logoPreview').attr('src', db.company.logo).removeClass('d-none');
+            }
+        }
+
+        function saveCompanyConfig(e) {
+            e.preventDefault();
+            
+            const companyData = {
+                name: $('#configCompanyName').val(),
+                address: $('#configCompanyAddress').val(),
+                city: $('#configCompanyCity').val(),
+                phone: $('#configCompanyPhone').val(),
+                cnpj: $('#configCompanyCnpj').val(),
+                ie: $('#configCompanyIe').val(),
+                logo: db.company.logo // Mantém o logo atual por padrão
+            };
+            
+            if (!companyData.name) {
+                alert('O nome da empresa é obrigatório!');
+                return;
+            }
+            
+            // Verifica se foi enviada uma nova imagem
+            const fileInput = $('#configCompanyLogo')[0];
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    companyData.logo = e.target.result;
+                    db.company = companyData;
+                    saveToLocalStorage();
+                    updateUI();
+                    alert('Configurações da empresa salvas com sucesso!');
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                db.company = companyData;
+                saveToLocalStorage();
+                updateUI();
+                alert('Configurações da empresa salvas com sucesso!');
+            }
+        }
+
+        // Seleção de linha na tabela de clientes (modal)
+        $(document).on('click', '#modalClientsTable tbody tr', function() {
+            $('#modalClientsTable tbody tr').removeClass('selected');
+            $(this).addClass('selected');
+        });
+    </script>
+</body>
+</html>
